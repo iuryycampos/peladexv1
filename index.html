@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Peladex — Seu time. Na sorte.</title>
+<meta name="description" content="Cadastre os jogadores da pelada e sorteie os times de forma rápida e equilibrada." />
+<meta name="theme-color" content="#0A1712" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230A1712'/%3E%3Ccircle cx='32' cy='32' r='21' fill='none' stroke='%232FE07C' stroke-width='3'/%3E%3Cpath d='M32 16 L40 22 L37 32 L27 32 L24 22 Z' fill='%232FE07C'/%3E%3C/svg%3E" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div class="app" id="app">
+
+  <header class="header">
+    <div class="logo">
+      <svg width="30" height="30" viewBox="0 0 64 64" fill="none" aria-hidden="true">
+        <rect width="64" height="64" rx="14" fill="#122019"/>
+        <circle cx="32" cy="32" r="21" fill="none" stroke="#2FE07C" stroke-width="3"/>
+        <path d="M32 16 L40 22 L37 32 L27 32 L24 22 Z" fill="#2FE07C"/>
+        <path d="M32 16 L32 11 M40 22 L47 18 M37 32 L41 40 M27 32 L23 40 M24 22 L17 18" stroke="#2FE07C" stroke-width="2.5" stroke-linecap="round"/>
+        <circle cx="47" cy="18" r="3" fill="#FFD23F"/>
+      </svg>
+      <h1>PELADEX</h1>
+    </div>
+    <p class="slogan">Seu time. Na sorte.</p>
+  </header>
+
+  <!-- ESTADO 1: CONFIGURANDO -->
+  <main class="view" id="view-config" data-state="configuring">
+
+    <section class="card" aria-labelledby="players-heading">
+      <div class="card-head">
+        <h2 id="players-heading">Jogadores</h2>
+        <span class="count-badge" id="playerCount">0 jogadores</span>
+      </div>
+
+      <form id="playerForm" class="player-form" novalidate>
+        <label for="playerName" class="sr-only">Nome do jogador</label>
+        <input
+          type="text"
+          id="playerName"
+          name="playerName"
+          placeholder="Nome do jogador"
+          maxlength="24"
+          autocomplete="off"
+        />
+        <button type="submit" class="btn btn-primary btn-add" aria-label="Adicionar jogador">
+          Adicionar
+        </button>
+      </form>
+      <p class="field-error" id="playerError" role="alert" aria-live="polite"></p>
+
+      <ul class="player-list" id="playerList" aria-label="Lista de jogadores cadastrados"></ul>
+
+      <p class="empty-hint" id="emptyHint">Adicione os jogadores presentes na pelada.</p>
+    </section>
+
+    <section class="card" aria-labelledby="teams-heading">
+      <div class="card-head">
+        <h2 id="teams-heading">Times</h2>
+      </div>
+
+      <div class="team-select" role="group" aria-label="Quantidade de times">
+        <button type="button" class="team-option is-selected" data-teams="2" aria-pressed="true">
+          <span class="team-option-num">2</span>
+          <span class="team-option-label">TIMES</span>
+        </button>
+        <button type="button" class="team-option" data-teams="3" aria-pressed="false">
+          <span class="team-option-num">3</span>
+          <span class="team-option-label">TIMES</span>
+        </button>
+        <button type="button" class="team-option" data-teams="4" aria-pressed="false">
+          <span class="team-option-num">4</span>
+          <span class="team-option-label">TIMES</span>
+        </button>
+      </div>
+
+      <p class="summary-line" id="summaryLine">0 jogadores • 2 times</p>
+    </section>
+
+    <button class="btn btn-draw" id="drawBtn" disabled>
+      <span aria-hidden="true">⚽</span> SORTEAR TIMES
+    </button>
+    <p class="field-error" id="drawError" role="alert" aria-live="polite"></p>
+
+  </main>
+
+  <!-- ESTADO 2: SORTEANDO -->
+  <section class="view view-drawing" id="view-drawing" data-state="drawing" hidden aria-live="polite">
+    <div class="drawing-box">
+      <p class="drawing-title" id="drawingTitle">EMBARALHANDO...</p>
+      <p class="drawing-name" id="drawingName">&nbsp;</p>
+      <div class="drawing-spinner" aria-hidden="true">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ESTADO 3: RESULTADO -->
+  <section class="view view-result" id="view-result" data-state="result" hidden>
+    <h2 class="result-title">TIMES DEFINIDOS</h2>
+    <div class="teams-grid" id="teamsGrid"></div>
+
+    <div class="result-actions">
+      <button class="btn btn-secondary" id="redrawBtn">
+        <span aria-hidden="true">🔄</span> Sortear novamente
+      </button>
+      <button class="btn btn-primary" id="copyBtn">
+        <span aria-hidden="true">📋</span> Copiar resultado
+      </button>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <button class="link-btn" id="newGameBtn">Novo jogo</button>
+  </footer>
+
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<div class="modal-overlay" id="confirmOverlay" hidden>
+  <div class="modal" role="alertdialog" aria-modal="true" aria-labelledby="confirmTitle">
+    <p class="modal-title" id="confirmTitle">Começar um novo jogo?</p>
+    <p class="modal-body">Isso vai apagar todos os jogadores e o resultado do sorteio atual.</p>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" id="confirmCancel">Cancelar</button>
+      <button class="btn btn-danger" id="confirmOk">Apagar tudo</button>
+    </div>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
