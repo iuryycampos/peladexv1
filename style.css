@@ -37,6 +37,14 @@
   box-sizing: border-box;
 }
 
+/* IMPORTANTE: sem esta regra, classes como .view e .modal-overlay
+   (que definem display: flex) sobrescrevem o comportamento padrão
+   do atributo [hidden], deixando elementos "escondidos" visíveis
+   e bloqueando a interação com o site. */
+[hidden] {
+  display: none !important;
+}
+
 html, body {
   margin: 0;
   padding: 0;
